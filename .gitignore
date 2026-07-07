@@ -1,0 +1,22 @@
+# Secrets & personal data — NEVER commit these
+.env
+saves/
+stats.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.claude/
+
+# OS
+Thumbs.db
+.DS_Store

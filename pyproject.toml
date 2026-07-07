@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reading-pacer"
+version = "1.0.0"
+description = "A distraction-free speed-reading pacer with AI comprehension quizzes — bring a DeepSeek/OpenAI-compatible API key or a local GGUF model."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Bloodtailor" }]
+keywords = [
+    "reading", "speed-reading", "pacer", "comprehension",
+    "education", "tkinter", "deepseek", "llm",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: MacOS X",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: X11 Applications",
+    "Intended Audience :: Education",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Education",
+    "Topic :: Text Processing",
+]
+
+# The core app is pure stdlib (tkinter + urllib) — zero dependencies.
+dependencies = []
+
+[project.optional-dependencies]
+local = ["llama-cpp-python>=0.2.20"]
+dev = ["pytest>=7.0", "ruff>=0.4"]
+
+[project.scripts]
+reading-pacer = "reading_pacer.app:main"
+
+[project.urls]
+Homepage = "https://github.com/Bloodtailor/reading-pacer"
+Repository = "https://github.com/Bloodtailor/reading-pacer"
+Issues = "https://github.com/Bloodtailor/reading-pacer/issues"
+
+[tool.setuptools.packages.find]
+include = ["reading_pacer*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
