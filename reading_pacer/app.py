@@ -3,6 +3,7 @@ app.py — Main application entry point.
 Orchestrates screens: main → reading/generate/settings/stats, save/resume.
 """
 
+import os
 import sys
 import tkinter as tk
 
@@ -199,9 +200,21 @@ def _enable_windows_dpi_awareness():
         pass  # never let DPI setup stop the app
 
 
+def _set_window_icon(root: tk.Tk):
+    assets = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+    try:
+        if sys.platform == "win32":
+            root.iconbitmap(os.path.join(assets, "icon.ico"))
+        else:
+            root.iconphoto(True, tk.PhotoImage(file=os.path.join(assets, "icon.png")))
+    except Exception:
+        pass  # a missing icon should never stop the app
+
+
 def main():
     _enable_windows_dpi_awareness()
     root = tk.Tk()
+    _set_window_icon(root)
     App(root)
     root.mainloop()
 

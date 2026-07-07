@@ -50,6 +50,9 @@ Issues = "https://github.com/Bloodtailor/reading-pacer/issues"
 [tool.setuptools.packages.find]
 include = ["reading_pacer*"]
 
+[tool.setuptools.package-data]
+reading_pacer = ["assets/*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"

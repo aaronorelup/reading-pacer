@@ -46,6 +46,17 @@ numbers over time and find *your* optimal speed.
 
 ## Install
 
+### Windows — just download it
+
+Grab **`ReadingPacer.exe`** from the [latest release](https://github.com/Bloodtailor/reading-pacer/releases/latest) —
+no Python needed. Put it anywhere (e.g. a `Programs` folder), run it, and pin it
+to your taskbar. Windows SmartScreen may warn because the exe is unsigned —
+click *More info → Run anyway*.
+
+You can rebuild it yourself from source: `powershell -File packaging\build-exe.ps1`.
+
+### From source (any OS)
+
 Requires Python 3.10+ with tkinter (included in the standard python.org installers).
 
 ```bash

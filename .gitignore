@@ -16,6 +16,7 @@ venv/
 .pytest_cache/
 .ruff_cache/
 .claude/
+*.spec
 
 # OS
 Thumbs.db
