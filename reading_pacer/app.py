@@ -6,14 +6,17 @@ Orchestrates screens: main → reading/generate/settings/stats, save/resume.
 import os
 import sys
 import tkinter as tk
+from tkinter import messagebox
 
+from reading_pacer import crashlog
 from reading_pacer.config import config
 from reading_pacer.screens.generate_screen import GenerateScreen
 from reading_pacer.screens.main_screen import MainScreen
 from reading_pacer.screens.reading_screen import ReadingScreen
 from reading_pacer.screens.settings_screen import SettingsScreen
 from reading_pacer.screens.stats_screen import StatsScreen
-from reading_pacer.services import save_manager
+from reading_pacer.screens.update_dialog import UpdateDialog
+from reading_pacer.services import save_manager, updater
 from reading_pacer.themes import C
 
 
@@ -50,6 +53,55 @@ class App:
         else:
             self._init_main_screen()
             self.main_screen.pack(fill="both", expand=True)
+
+        self.root.protocol("WM_DELETE_WINDOW", self.quit)
+        self._update_dialog = None
+        if config.check_for_updates:
+            self.root.after(2500, lambda: self.check_for_updates(manual=False))
+
+    # ── Quit / updates ─────────────────────────────────────────────────
+
+    def quit(self):
+        """Save reading progress, then close the app."""
+        if self.reading_screen:
+            try:
+                self.reading_screen._auto_save()
+            except Exception as e:  # never block closing the window
+                crashlog.write(f"save on quit failed: {e!r}")
+        self.root.destroy()
+
+    def check_for_updates(self, manual: bool):
+        """Ask GitHub for a newer release. `manual` = the user clicked "Check now"."""
+
+        def _result(info):
+            if info is None:
+                if manual:
+                    messagebox.showinfo("Up to date",
+                                        "You have the latest version of Reading Pacer.",
+                                        parent=self.root)
+                return
+            if not manual and info.version == config.skipped_version:
+                return
+            self._show_update(info)
+
+        def _error(msg):
+            crashlog.write(f"update check failed: {msg}")
+            if manual:
+                messagebox.showwarning("Couldn't check for updates",
+                                       "Couldn't reach the update server. "
+                                       "Check your internet connection and try again.",
+                                       parent=self.root)
+
+        # Worker-thread callbacks — marshal onto the Tk loop.
+        updater.check_for_update(
+            on_result=lambda info: self.root.after(0, lambda: _result(info)),
+            on_error=lambda msg: self.root.after(0, lambda: _error(msg)),
+        )
+
+    def _show_update(self, info):
+        if self._update_dialog and self._update_dialog.winfo_exists():
+            return
+        self._update_dialog = UpdateDialog(self.root, info, on_quit=self.quit)
 
     # ── Screen initialisation ──────────────────────────────────────────
 
@@ -140,7 +192,9 @@ class App:
 
     def _show_settings(self):
         self._hide_current()
-        self.settings_screen = SettingsScreen(self.root, on_close=self._close_settings)
+        self.settings_screen = SettingsScreen(
+            self.root, on_close=self._close_settings,
+            on_check_updates=lambda: self.check_for_updates(manual=True))
         self.settings_screen.pack(fill="both", expand=True)
 
     def _close_settings(self):
@@ -215,7 +269,22 @@ def main():
     _enable_windows_dpi_awareness()
     root = tk.Tk()
     _set_window_icon(root)
-    App(root)
+    crashlog.install(root)
+    try:
+        App(root)
+    except Exception:
+        # Startup failed (e.g. a corrupt save file): log it and say so plainly
+        # instead of a window that silently never appears.
+        details = crashlog.format_exception(*sys.exc_info())
+        crashlog.write(details)
+        messagebox.showerror(
+            "Reading Pacer couldn't start",
+            "Sorry — Reading Pacer hit an error while starting.\n\n"
+            f"Details were saved to:\n{crashlog.log_path()}\n\n"
+            "Please report it at github.com/Bloodtailor/reading-pacer/issues",
+            parent=root)
+        root.destroy()
+        sys.exit(1)
     root.mainloop()
 
 

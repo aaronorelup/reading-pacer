@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.1.0 — 2026-09-25
+
+### Added
+- **Windows installer**: per-user install with no admin prompt, Start Menu and
+  optional desktop shortcut, and an uninstaller in Settings → Apps that asks
+  whether to keep your settings and reading history.
+- **Automatic updates**: the app checks GitHub for a new version at startup.
+  On Windows it downloads the new installer, checks it against GitHub's
+  SHA-256 digest, and upgrades and restarts in one click. Turn it off, or check
+  manually, in Settings → Updates.
+- **macOS app**: a universal (Apple Silicon + Intel) `.dmg` for macOS 11+.
+- **Portable Windows zip** for people who'd rather not install.
+- **Error reporting**: unexpected errors are logged to
+  `logs/reading-pacer.log` in your data folder, with a friendly window that
+  can copy the details or open a pre-filled GitHub issue.
+- `--self-test` / `--version` command-line options. CI uses the self-test to
+  install and check the real app on fresh Windows, macOS and Linux machines
+  for every change.
+
+### Fixed
+- Buttons on macOS showed as grey system buttons with unreadable text; they
+  now match the theme.
+- Scrolling the Settings screen with the mouse wheel did nothing on macOS and
+  Linux.
+- Cmd+S / Cmd+R now work on macOS.
+- Pressing Save and then New Text within a second and a half raised an error.
+- Closing the window could lose up to 5 seconds of reading progress; it is
+  now saved on close.
+- HTTPS (AI quizzes and update checks) now works in the macOS app, which
+  doesn't use the system certificate store.
+- Portable/test mode (`READING_PACER_HOME`) could read, and on New Text
+  delete, a pre-1.0 save file in the source folder. It now only ever uses its
+  own folder.
+
+### Changed
+- The Windows app is now a folder install instead of a single self-extracting
+  exe, so it starts faster and antivirus software is less likely to flag it.
+
 ## 1.0.0 — 2026-07-07
 
 First public release. 🎉

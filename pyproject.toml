@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "reading-pacer"
-version = "1.0.0"
+dynamic = ["version"]
 description = "A distraction-free speed-reading pacer with AI comprehension quizzes — bring a DeepSeek/OpenAI-compatible API key or a local GGUF model."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -32,20 +32,24 @@ classifiers = [
     "Topic :: Text Processing",
 ]
 
-# The core app is pure stdlib (tkinter + urllib) — zero dependencies.
-dependencies = []
+# The core app is pure stdlib (tkinter + urllib). certifi only on macOS,
+# where python.org builds don't use the system's trusted certificates.
+dependencies = ['certifi; sys_platform == "darwin"']
 
 [project.optional-dependencies]
 local = ["llama-cpp-python>=0.2.20"]
 dev = ["pytest>=7.0", "ruff>=0.4"]
 
 [project.scripts]
-reading-pacer = "reading_pacer.app:main"
+reading-pacer = "reading_pacer.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/Bloodtailor/reading-pacer"
 Repository = "https://github.com/Bloodtailor/reading-pacer"
 Issues = "https://github.com/Bloodtailor/reading-pacer/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "reading_pacer.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["reading_pacer*"]

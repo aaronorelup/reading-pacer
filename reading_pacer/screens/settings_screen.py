@@ -6,9 +6,11 @@ Full-screen, accessed from the main screen via the ⚙ button.
 import tkinter as tk
 from tkinter import filedialog
 
+from reading_pacer import __version__
 from reading_pacer.config import MAX_QUIZ_QUESTIONS, MIN_QUIZ_QUESTIONS, config
 from reading_pacer.services import llm_service
 from reading_pacer.themes import BTN_FG, C
+from reading_pacer.widgets import Button, bind_mousewheel
 
 # Preset → (base URL, default model). Selecting one fills the URL/model fields.
 PROVIDER_PRESETS = {
@@ -24,10 +26,11 @@ PROVIDER_PRESETS = {
 class SettingsScreen(tk.Frame):
     """Full-screen settings frame with scrolling content."""
 
-    def __init__(self, root, on_close):
+    def __init__(self, root, on_close, on_check_updates=None):
         super().__init__(root, bg=C["base"])
         self.root = root
         self.on_close = on_close
+        self.on_check_updates = on_check_updates
         self._build()
 
     def _build(self):
@@ -38,7 +41,7 @@ class SettingsScreen(tk.Frame):
         hdr.pack(fill="x")
         tk.Label(hdr, text="⚙ Settings", font=("Helvetica", 18, "bold"),
                  fg=C["lavender"], bg=C["mantle"]).pack(side="left")
-        tk.Button(hdr, text="← Back", font=("Helvetica", 11),
+        Button(hdr, text="← Back", font=("Helvetica", 11),
                   bg=C["surface0"], fg=C["text"], relief="flat",
                   padx=14, pady=4, cursor="hand2",
                   command=self.on_close).pack(side="right")
@@ -58,10 +61,7 @@ class SettingsScreen(tk.Frame):
         scroll.pack(side="right", fill="y")
         canvas.pack(fill="both", expand=True)
 
-        def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-        canvas.bind("<Enter>", lambda e: canvas.bind_all("<MouseWheel>", _on_mousewheel))
-        canvas.bind("<Leave>", lambda e: canvas.unbind_all("<MouseWheel>"))
+        bind_mousewheel(canvas, canvas)
 
         # ── Default Provider ──
         tk.Label(inner, text="Default Provider", font=("Helvetica", 14, "bold"),
@@ -109,7 +109,7 @@ class SettingsScreen(tk.Frame):
             self._key_shown = not self._key_shown
             self.api_key_entry.config(show="" if self._key_shown else "•")
             show_btn.config(text="Hide" if self._key_shown else "Show")
-        show_btn = tk.Button(key_row, text="Show", font=("Helvetica", 10),
+        show_btn = Button(key_row, text="Show", font=("Helvetica", 10),
                              bg=C["surface0"], fg=C["text"], relief="flat",
                              padx=10, pady=4, cursor="hand2", command=_toggle_key)
         show_btn.pack(side="right", padx=(8, 0))
@@ -126,7 +126,7 @@ class SettingsScreen(tk.Frame):
         # Test connection
         test_row = tk.Frame(inner, bg=C["base"])
         test_row.pack(fill="x", padx=40, pady=(12, 0))
-        self.test_btn = tk.Button(test_row, text="⚡ Test Connection",
+        self.test_btn = Button(test_row, text="⚡ Test Connection",
                                   font=("Helvetica", 11, "bold"),
                                   bg=C["blue"], fg=BTN_FG, relief="flat",
                                   padx=16, pady=6, cursor="hand2", command=self._test_connection)
@@ -148,7 +148,7 @@ class SettingsScreen(tk.Frame):
                                          relief="flat", width=50)
         self.local_path_entry.insert(0, config.llm_local_path)
         self.local_path_entry.pack(side="left", fill="x", expand=True, padx=(0, 8), ipady=6)
-        tk.Button(lf, text="Browse…", font=("Helvetica", 10),
+        Button(lf, text="Browse…", font=("Helvetica", 10),
                   bg=C["surface0"], fg=C["text"], relief="flat", padx=10, pady=4,
                   cursor="hand2", command=self._browse_local).pack(side="right")
 
@@ -184,9 +184,28 @@ class SettingsScreen(tk.Frame):
         tk.Label(af, text="(restart to apply)", font=("Helvetica", 10),
                  fg=C["overlay0"], bg=C["base"]).pack(side="left")
 
+        # ── Updates section ──
+        _section(inner, "Updates")
+        uf = tk.Frame(inner, bg=C["base"])
+        uf.pack(**pad)
+        self.updates_var = tk.BooleanVar(value=config.check_for_updates)
+        tk.Checkbutton(uf, text="Check for updates when the app starts",
+                       variable=self.updates_var, font=("Helvetica", 12),
+                       fg=C["text"], bg=C["base"], selectcolor=C["surface1"],
+                       activebackground=C["base"], activeforeground=C["lavender"],
+                       cursor="hand2").pack(side="left")
+        uf2 = tk.Frame(inner, bg=C["base"])
+        uf2.pack(**pad)
+        tk.Label(uf2, text=f"You have version {__version__}", font=("Helvetica", 11),
+                 fg=C["subtext0"], bg=C["base"]).pack(side="left", padx=(0, 12))
+        if self.on_check_updates:
+            Button(uf2, text="Check now", font=("Helvetica", 11),
+                   bg=C["surface0"], fg=C["text"], relief="flat", padx=12, pady=3,
+                   cursor="hand2", command=self.on_check_updates).pack(side="left")
+
         # ── Save ──
         tk.Frame(inner, bg=C["base"], height=20).pack()
-        tk.Button(inner, text="Save & Close", font=("Helvetica", 13, "bold"),
+        Button(inner, text="Save & Close", font=("Helvetica", 13, "bold"),
                   bg=C["green"], fg=BTN_FG, relief="flat", padx=32, pady=10,
                   cursor="hand2", command=self._save).pack(pady=16)
 
@@ -261,6 +280,7 @@ class SettingsScreen(tk.Frame):
         except ValueError:
             pass
         config.theme = self.theme_var.get()
+        config.check_for_updates = bool(self.updates_var.get())
 
     def _save(self):
         self._apply_fields()

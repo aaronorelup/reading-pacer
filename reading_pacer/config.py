@@ -1,7 +1,8 @@
 """
 config.py — Loads settings from a .env file, provides a typed Config singleton.
 
-Search order for the .env file:
+Search order for the .env file (unless READING_PACER_HOME is set, in which
+case only that folder is used):
   1. ./.env                      (current working directory)
   2. <repo root>/.env            (source checkout)
   3. <user data dir>/.env        (installed app — see paths.user_data_dir)
@@ -20,7 +21,12 @@ MIN_QUIZ_QUESTIONS, MAX_QUIZ_QUESTIONS = 3, 12
 
 
 def find_env() -> str:
-    """Return the path of the first .env found, else the user-dir default."""
+    """Return the path of the first .env found, else the user-dir default.
+
+    When READING_PACER_HOME is set (portable mode, tests), only that folder is used.
+    """
+    if os.environ.get("READING_PACER_HOME"):
+        return os.path.join(paths.user_data_dir(), ".env")
     candidates = [
         os.path.join(os.getcwd(), ".env"),
         os.path.join(paths.repo_root(), ".env"),
@@ -57,6 +63,12 @@ def _to_int(value: str, default: int) -> int:
         return default
 
 
+def _to_bool(value: str | None, default: bool) -> bool:
+    if value is None or not value.strip():
+        return default
+    return value.strip().lower() in ("1", "true", "yes", "on")
+
+
 @dataclass
 class Config:
     # ── API model (DeepSeek by default; any OpenAI-compatible endpoint works) ──
@@ -73,6 +85,8 @@ class Config:
     llm_default_provider: str = "api"  # "api" or "local"
     theme: str = "mocha"               # "mocha" (dark) or "latte" (light)
     quiz_questions: int = 8
+    check_for_updates: bool = True
+    skipped_version: str = ""          # "Skip this version" in the update banner
 
     # Where settings are persisted (set by load(); not written to the file itself)
     env_path: str = ""
@@ -112,6 +126,8 @@ class Config:
             llm_default_provider=env.get("LLM_DEFAULT_PROVIDER", "api"),
             theme=env.get("THEME", "mocha"),
             quiz_questions=_to_int(env.get("QUIZ_QUESTIONS"), 8),
+            check_for_updates=_to_bool(env.get("CHECK_FOR_UPDATES"), True),
+            skipped_version=env.get("SKIPPED_VERSION", ""),
             env_path=path,
         )
         if cfg.theme not in VALID_THEMES:
@@ -147,6 +163,8 @@ class Config:
         _set("LLM_DEFAULT_PROVIDER", self.llm_default_provider)
         _set("THEME", self.theme)
         _set("QUIZ_QUESTIONS", str(self.quiz_questions))
+        _set("CHECK_FOR_UPDATES", "true" if self.check_for_updates else "false")
+        _set("SKIPPED_VERSION", self.skipped_version)
 
         paths.ensure_dir(os.path.dirname(os.path.abspath(path)))
         with open(path, "w", encoding="utf-8") as f:
