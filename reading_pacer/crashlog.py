@@ -18,7 +18,7 @@ from datetime import datetime
 from reading_pacer import __version__, paths
 
 MAX_LOG_BYTES = 512 * 1024
-ISSUES_URL = "https://github.com/Bloodtailor/reading-pacer/issues/new"
+ISSUES_URL = "https://github.com/aaronorelup/reading-pacer/issues/new"
 
 
 def log_path() -> str:

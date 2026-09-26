@@ -38,7 +38,7 @@ plutil -replace CFBundleShortVersionString -string "$VERSION" "$PLIST"
 plutil -replace CFBundleVersion -string "$VERSION" "$PLIST"
 plutil -replace NSHighResolutionCapable -bool true "$PLIST"
 plutil -replace LSMinimumSystemVersion -string "11.0" "$PLIST"
-plutil -replace NSHumanReadableCopyright -string "MIT License - github.com/Bloodtailor/reading-pacer" "$PLIST"
+plutil -replace NSHumanReadableCopyright -string "MIT License - github.com/aaronorelup/reading-pacer" "$PLIST"
 
 # Editing Info.plist invalidates the signature; re-sign ad-hoc (required on Apple Silicon).
 codesign --force --deep --sign - "$APP"

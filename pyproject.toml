@@ -44,9 +44,9 @@ dev = ["pytest>=7.0", "ruff>=0.4"]
 reading-pacer = "reading_pacer.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Bloodtailor/reading-pacer"
-Repository = "https://github.com/Bloodtailor/reading-pacer"
-Issues = "https://github.com/Bloodtailor/reading-pacer/issues"
+Homepage = "https://github.com/aaronorelup/reading-pacer"
+Repository = "https://github.com/aaronorelup/reading-pacer"
+Issues = "https://github.com/aaronorelup/reading-pacer/issues"
 
 [tool.setuptools.dynamic]
 version = { attr = "reading_pacer.__version__" }

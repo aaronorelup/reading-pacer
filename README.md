@@ -7,7 +7,7 @@ Paste any text, set your words-per-minute, and a smooth arrow glides along the
 words to keep your eyes moving. When you're done, take a quiz generated from
 *exactly what you just read* — so you know whether that speed actually stuck.
 
-![CI](https://github.com/Bloodtailor/reading-pacer/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/aaronorelup/reading-pacer/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -48,7 +48,7 @@ numbers over time and find *your* optimal speed.
 ## Install
 
 No Python needed for either download. Both are on the
-[latest release](https://github.com/Bloodtailor/reading-pacer/releases/latest) page.
+[latest release](https://github.com/aaronorelup/reading-pacer/releases/latest) page.
 
 ### Windows 10 / 11
 
@@ -87,7 +87,7 @@ it anywhere, and run `ReadingPacer.exe`. It works fine, but updates are manual.
 Requires Python 3.10+ with tkinter (included in the standard python.org installers).
 
 ```bash
-git clone https://github.com/Bloodtailor/reading-pacer.git
+git clone https://github.com/aaronorelup/reading-pacer.git
 cd reading-pacer
 pip install .
 reading-pacer
@@ -172,7 +172,7 @@ off in ⚙ Settings → Updates.
 If the app hits an error, it shows a window with **Report on GitHub**, which
 opens a pre-filled issue. Error details are also written to a log file in
 your user data directory (`logs/reading-pacer.log`). Please
-[open an issue](https://github.com/Bloodtailor/reading-pacer/issues) with it.
+[open an issue](https://github.com/aaronorelup/reading-pacer/issues) with it.
 
 ## Contributing
 

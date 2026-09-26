@@ -281,7 +281,7 @@ def main():
             "Reading Pacer couldn't start",
             "Sorry — Reading Pacer hit an error while starting.\n\n"
             f"Details were saved to:\n{crashlog.log_path()}\n\n"
-            "Please report it at github.com/Bloodtailor/reading-pacer/issues",
+            "Please report it at github.com/aaronorelup/reading-pacer/issues",
             parent=root)
         root.destroy()
         sys.exit(1)

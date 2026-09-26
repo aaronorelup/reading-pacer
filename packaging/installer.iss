@@ -14,7 +14,7 @@
 
 #define AppName "Reading Pacer"
 #define AppExe "ReadingPacer.exe"
-#define AppUrl "https://github.com/Bloodtailor/reading-pacer"
+#define AppUrl "https://github.com/aaronorelup/reading-pacer"
 
 [Setup]
 ; Never change AppId — it is how upgrades and the uninstaller find this app.

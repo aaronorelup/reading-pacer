@@ -29,7 +29,7 @@ from dataclasses import dataclass
 
 from reading_pacer import __version__
 
-REPO = "Bloodtailor/reading-pacer"
+REPO = "aaronorelup/reading-pacer"
 LATEST_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 RELEASES_PAGE = f"https://github.com/{REPO}/releases/latest"
 INSTALLER_RE = re.compile(r"^ReadingPacer-Setup-[\d.]+\.exe$")
