@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 from reading_pacer.themes import BTN_FG, C
+from reading_pacer.widgets import Button
 
 
 class MainScreen(tk.Frame):
@@ -35,11 +36,11 @@ class MainScreen(tk.Frame):
                  font=("Helvetica", 26, "bold"),
                  fg=C["lavender"], bg=C["base"]).pack(side="left")
 
-        tk.Button(title_row, text="⚙ Settings", font=("Helvetica", 10),
+        Button(title_row, text="⚙ Settings", font=("Helvetica", 10),
                   bg=C["surface0"], fg=C["text"], relief="flat",
                   padx=14, pady=4, cursor="hand2",
                   command=self.on_open_settings).pack(side="right")
-        tk.Button(title_row, text="📊 Stats", font=("Helvetica", 10),
+        Button(title_row, text="📊 Stats", font=("Helvetica", 10),
                   bg=C["surface0"], fg=C["text"], relief="flat",
                   padx=14, pady=4, cursor="hand2",
                   command=self.on_open_stats).pack(side="right", padx=(0, 8))
@@ -49,7 +50,7 @@ class MainScreen(tk.Frame):
         sub_row.pack(fill="x", padx=44, pady=(0, 14))
         tk.Label(sub_row, text="Paste your text below — or open a file — then press Load.",
                  font=("Helvetica", 13), fg=C["subtext0"], bg=C["base"]).pack(side="left")
-        tk.Button(sub_row, text="📂 Open File…", font=("Helvetica", 10),
+        Button(sub_row, text="📂 Open File…", font=("Helvetica", 10),
                   bg=C["surface0"], fg=C["text"], relief="flat",
                   padx=12, pady=3, cursor="hand2",
                   command=self._open_file).pack(side="right")
@@ -61,7 +62,7 @@ class MainScreen(tk.Frame):
         btn_inner.pack()
 
         def _btn(text, color, cmd):
-            tk.Button(btn_inner, text=text, font=("Helvetica", 12, "bold"),
+            Button(btn_inner, text=text, font=("Helvetica", 12, "bold"),
                       bg=color, fg=BTN_FG, relief="flat",
                       padx=24, pady=8, cursor="hand2", command=cmd).pack(side="left", padx=5)
 

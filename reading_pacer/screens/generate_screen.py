@@ -7,6 +7,7 @@ import tkinter as tk
 
 from reading_pacer.services.llm_service import generate_passage
 from reading_pacer.themes import BTN_FG, C
+from reading_pacer.widgets import Button
 
 
 class GenerateScreen(tk.Frame):
@@ -27,7 +28,7 @@ class GenerateScreen(tk.Frame):
         hdr.pack(fill="x")
         tk.Label(hdr, text="Generate Passage", font=("Helvetica", 18, "bold"),
                  fg=C["lavender"], bg=C["mantle"]).pack(side="left")
-        tk.Button(hdr, text="✕ Cancel", font=("Helvetica", 11),
+        Button(hdr, text="✕ Cancel", font=("Helvetica", 11),
                   bg=C["surface0"], fg=C["text"], relief="flat",
                   padx=14, pady=4, cursor="hand2",
                   command=self._cancel).pack(side="right")
@@ -59,7 +60,7 @@ class GenerateScreen(tk.Frame):
 
         # ── Generate button ──
         tk.Frame(form, bg=C["base"], height=16).pack()
-        self.gen_btn = tk.Button(form, text="⚡ Generate Passage", font=("Helvetica", 13, "bold"),
+        self.gen_btn = Button(form, text="⚡ Generate Passage", font=("Helvetica", 13, "bold"),
                                  bg=C["lavender"], fg=BTN_FG, relief="flat",
                                  padx=32, pady=10, cursor="hand2", command=self._generate)
         self.gen_btn.pack()
@@ -78,7 +79,7 @@ class GenerateScreen(tk.Frame):
                                    insertbackground=C["text"])
         self.result_text.pack(fill="both", expand=True)
 
-        self.use_btn = tk.Button(self.loading_frame, text="✔ Use This Passage",
+        self.use_btn = Button(self.loading_frame, text="✔ Use This Passage",
                                  font=("Helvetica", 13, "bold"),
                                  bg=C["green"], fg=BTN_FG, relief="flat",
                                  padx=32, pady=10, cursor="hand2",

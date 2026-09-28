@@ -8,6 +8,7 @@ from datetime import datetime
 
 from reading_pacer.services import stats_manager
 from reading_pacer.themes import C
+from reading_pacer.widgets import Button
 
 CHART_SESSIONS = 30  # most recent sessions shown in the trend chart
 
@@ -29,7 +30,7 @@ class StatsScreen(tk.Frame):
         hdr.pack(fill="x")
         tk.Label(hdr, text="📊 Reading Stats", font=("Helvetica", 18, "bold"),
                  fg=C["lavender"], bg=C["mantle"]).pack(side="left")
-        tk.Button(hdr, text="← Back", font=("Helvetica", 11),
+        Button(hdr, text="← Back", font=("Helvetica", 11),
                   bg=C["surface0"], fg=C["text"], relief="flat",
                   padx=14, pady=4, cursor="hand2",
                   command=self.on_close).pack(side="right")

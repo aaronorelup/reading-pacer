@@ -1,5 +1,5 @@
 """Allow running as `python -m reading_pacer`."""
 
-from reading_pacer.app import main
+from reading_pacer.cli import main
 
 main()

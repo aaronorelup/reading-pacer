@@ -11,6 +11,7 @@ from reading_pacer.config import config
 from reading_pacer.services import save_manager, stats_manager
 from reading_pacer.services.llm_service import generate_questions as llm_generate_questions
 from reading_pacer.themes import BTN_FG, C
+from reading_pacer.widgets import IS_MAC, Button
 
 MIN_STATS_WORDS = 30      # don't record sessions shorter than this
 MIN_STATS_SECONDS = 10.0
@@ -65,6 +66,7 @@ class ReadingScreen(tk.Frame):
         self._quiz_frame = None
         self._quiz_main_area = None   # the reading-content area we hide during quiz
 
+        self._oneshots: set[str] = set()  # pending _later() callbacks
         self._build()
         self._bind_keys()
 
@@ -79,7 +81,21 @@ class ReadingScreen(tk.Frame):
                 except Exception:
                     pass
                 setattr(self, attr, None)
+        for tid in self._oneshots:
+            try:
+                self.root.after_cancel(tid)
+            except Exception:
+                pass
+        self._oneshots.clear()
         super().destroy()
+
+    def _later(self, ms: int, fn):
+        """One-off root.after() that is cancelled if this screen is destroyed first."""
+        def run():
+            self._oneshots.discard(tid)
+            fn()
+        tid = self.root.after(ms, run)
+        self._oneshots.add(tid)
 
     # ═══════════════════════════════════════════════════════════════════
     #  BUILD  (bottom bar packed FIRST so it never goes off-screen)
@@ -110,10 +126,10 @@ class ReadingScreen(tk.Frame):
         _sbtn(font_box, "A↑", lambda: self._adj_font(1)).pack(side="left", padx=(4, 0))
 
         # Right-side buttons
-        tk.Button(top, text="💾 Save", font=("Helvetica", 10),
+        Button(top, text="💾 Save", font=("Helvetica", 10),
                   bg=C["surface0"], fg=C["text"], relief="flat", padx=12, pady=2,
                   cursor="hand2", command=self._manual_save).pack(side="right", padx=4)
-        tk.Button(top, text="New Text", font=("Helvetica", 10),
+        Button(top, text="New Text", font=("Helvetica", 10),
                   bg=C["surface0"], fg=C["text"], relief="flat", padx=12, pady=2,
                   cursor="hand2", command=self._do_new_text).pack(side="right")
 
@@ -131,7 +147,7 @@ class ReadingScreen(tk.Frame):
         self.play_btn.pack(side="left", padx=(0, 8))
         _ctrl(ctrl, "⏮", self._restart).pack(side="left", padx=(0, 8))
         _ctrl(ctrl, "⏹", self._stop).pack(side="left")
-        tk.Button(ctrl, text="📝 Quiz", font=("Helvetica", 12, "bold"),
+        Button(ctrl, text="📝 Quiz", font=("Helvetica", 12, "bold"),
                   bg=C["green"], fg=BTN_FG, relief="flat", padx=20, pady=6,
                   cursor="hand2", command=self._start_quiz).pack(side="left", padx=(14, 0))
 
@@ -211,6 +227,9 @@ class ReadingScreen(tk.Frame):
         r.bind("<Down>", self._guarded(lambda: self._adj_speed(-25)))
         r.bind("<Control-r>", self._guarded(self._restart))
         r.bind("<Control-s>", self._guarded(self._manual_save))
+        if IS_MAC:  # Mac users expect Cmd, not Ctrl
+            r.bind("<Command-r>", self._guarded(self._restart))
+            r.bind("<Command-s>", self._guarded(self._manual_save))
         r.bind("<equal>", self._guarded(lambda: self._adj_font(1)))
         r.bind("<plus>", self._guarded(lambda: self._adj_font(1)))
         r.bind("<minus>", self._guarded(lambda: self._adj_font(-1)))
@@ -283,8 +302,8 @@ class ReadingScreen(tk.Frame):
         # Ensure we're showing reading content (not stuck on quiz)
         self._show_reading_content()
 
-        self.root.after(50, self._refresh_display)
-        self.root.after(70, self._auto_scroll)  # jump to the resume position
+        self._later(50, self._refresh_display)
+        self._later(70, self._auto_scroll)  # jump to the resume position
         self._update_stats()
         self._update_actual_speed()
         self._draw_progress()
@@ -567,7 +586,7 @@ class ReadingScreen(tk.Frame):
     def _manual_save(self):
         save_manager.save_state(*self._get_save_state())
         self.stats_label.configure(text="✓ Saved")
-        self.root.after(1500, self._update_stats)
+        self._later(1500, self._update_stats)
 
     def _schedule_auto_save(self):
         if self._save_timer_id:
@@ -664,7 +683,7 @@ class ReadingScreen(tk.Frame):
                                           fg=C["subtext0"], bg=C["base"])
         self._quiz_loading_sub.pack(pady=4)
 
-        tk.Button(self._quiz_frame, text="Cancel", font=("Helvetica", 11),
+        Button(self._quiz_frame, text="Cancel", font=("Helvetica", 11),
                   bg=C["surface0"], fg=C["text"], relief="flat",
                   padx=16, pady=4, cursor="hand2",
                   command=self._cancel_quiz).pack(side="bottom", pady=20)
@@ -761,7 +780,7 @@ class ReadingScreen(tk.Frame):
         self._quiz_buttons = []
         for i, choice in enumerate(q["choices"]):
             letter = chr(65 + i)
-            btn = tk.Button(ans_frame, text=f"{letter}) {choice}", font=("Helvetica", 13),
+            btn = Button(ans_frame, text=f"{letter}) {choice}", font=("Helvetica", 13),
                             bg=C["surface0"], fg=C["text"], relief="flat",
                             padx=20, pady=12, anchor="w", cursor="hand2",
                             command=lambda let=letter: self._answer_quiz(let))
@@ -774,7 +793,7 @@ class ReadingScreen(tk.Frame):
         self._quiz_feedback.pack(pady=(10, 6))
 
         # Bottom
-        tk.Button(self._quiz_frame, text="✕ Close Quiz", font=("Helvetica", 10),
+        Button(self._quiz_frame, text="✕ Close Quiz", font=("Helvetica", 10),
                   bg=C["surface0"], fg=C["subtext1"], relief="flat",
                   padx=12, pady=4, cursor="hand2",
                   command=self._cancel_quiz).pack(side="bottom", pady=12)
@@ -829,7 +848,7 @@ class ReadingScreen(tk.Frame):
         else:
             rating, color = "Read slower to retain more details.", C["red"]
 
-        tk.Button(self._quiz_frame, text="← Back to Reading", font=("Helvetica", 12, "bold"),
+        Button(self._quiz_frame, text="← Back to Reading", font=("Helvetica", 12, "bold"),
                   bg=C["lavender"], fg=BTN_FG, relief="flat",
                   padx=24, pady=10, cursor="hand2",
                   command=self._cancel_quiz).pack(side="bottom", pady=16)
@@ -881,12 +900,12 @@ class ReadingScreen(tk.Frame):
 # ── Widget helpers ─────────────────────────────────────────────────────
 
 def _sbtn(parent, text, cmd):
-    return tk.Button(parent, text=text, font=("Helvetica", 11),
+    return Button(parent, text=text, font=("Helvetica", 11),
                      bg=C["surface0"], fg=C["text"], relief="flat",
                      padx=8, pady=1, cursor="hand2", command=cmd)
 
 
 def _ctrl(parent, text, cmd):
-    return tk.Button(parent, text=text, font=("Helvetica", 20),
+    return Button(parent, text=text, font=("Helvetica", 20),
                      bg=C["surface0"], fg=C["text"], relief="flat",
                      padx=16, pady=6, cursor="hand2", command=cmd)

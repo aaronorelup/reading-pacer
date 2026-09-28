@@ -23,14 +23,17 @@ def _save_path() -> str:
     return os.path.join(paths.user_data_dir(), "saves", "current.json")
 
 
-def _legacy_save_path() -> str:
+def _legacy_save_path() -> str | None:
+    """Pre-1.0 save location — ignored in portable/test mode (READING_PACER_HOME)."""
+    if os.environ.get("READING_PACER_HOME"):
+        return None
     return os.path.join(paths.repo_root(), "saves", "current.json")
 
 
 def _migrate_legacy():
     """Copy a pre-1.0 save into the user data directory (once)."""
     new, old = _save_path(), _legacy_save_path()
-    if os.path.exists(new) or not os.path.exists(old):
+    if not old or os.path.exists(new) or not os.path.exists(old):
         return
     try:
         paths.ensure_dir(os.path.dirname(new))
@@ -74,7 +77,7 @@ def save_state(text: str, word_index: int, wpm: int, actual_elapsed: float,
 def delete_save():
     """Remove the save file (called on New Text)."""
     for p in (_save_path(), _legacy_save_path()):
-        if os.path.exists(p):
+        if p and os.path.exists(p):
             try:
                 os.remove(p)
             except OSError:
